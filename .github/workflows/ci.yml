@@ -1,0 +1,47 @@
+name: IMI checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m compileall -q app
+      - name: SQLite API smoke test
+        env:
+          DATABASE_URL: sqlite:///./ci.db
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+          from app.main import app
+          with TestClient(app) as client:
+              assert client.get("/api/health").json()["status"] == "ok"
+              instruments = client.get("/api/instruments").json()["items"]
+              assert len(instruments) >= 5
+              assert client.get("/api/candles?symbol=EUR%2FUSD&timeframe=15m").status_code == 200
+          print("Backend smoke tests passed")
+          PY
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm install
+      - run: npm run build
