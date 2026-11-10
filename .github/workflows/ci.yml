@@ -20,6 +20,7 @@ jobs:
       - name: API and indicator tests
         env:
           DATABASE_URL: sqlite:///./ci.db
+          PYTHONPATH: .
         run: pytest -q
   frontend:
     runs-on: ubuntu-latest
