@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
@@ -17,7 +16,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=("../.env", ".env"), extra="ignore")
     database_url: str = "sqlite:///./imi_local.db"
     twelve_data_api_key: str = ""
     twelve_data_base_url: str = "https://api.twelvedata.com"
@@ -45,7 +44,7 @@ class Provider(Base):
 
 class Instrument(Base):
     __tablename__ = "instruments"
-    id: Mapped[int] = mapped_column(BigInteger().with_variant(__import__("sqlalchemy").Integer, "sqlite"), primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer(), "sqlite"), primary_key=True)
     asset_class: Mapped[str] = mapped_column(String(20))
     canonical_symbol: Mapped[str] = mapped_column(String(40))
     display_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
@@ -130,7 +129,7 @@ def startup() -> None:
 
 
 def provider_symbol(symbol: str) -> str:
-    return symbol.replace("/", "/")
+    return symbol
 
 
 def serialize_bar(b: Bar) -> dict[str, Any]:
