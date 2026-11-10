@@ -65,9 +65,9 @@ docker compose up --build
 Open http://localhost:5173. The Docker frontend proxy targets the API service by its Compose DNS name.
 
 ## Important limitations
-- The current milestone is historical OHLCV and paper research; streaming is not implemented.
+- The current milestone is historical OHLCV monitoring only; live streaming is not implemented.
 - Genuine order flow requires trade prints with aggressor-side classification; a candle feed cannot provide it.
 - A genuine liquidity heatmap requires historical Level 2 order-book depth; Twelve Data candle data is not a substitute.
 - Options flow requires listed-options trades/quotes and contract metadata from an appropriate provider; it is not included in this build.
 - Forex volume is often tick volume or unavailable, so VWAP must be labelled as a proxy when the source does not provide exchange-traded volume.
-- This project is read-only. It does not place trades or connect to broker execution.
+- This project is strictly read-only. It does not connect to broker execution, place orders, or automate trading.
