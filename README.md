@@ -1,60 +1,64 @@
 # IMI — Institutional Market Intelligence
 
-Standalone, read-only market research and paper-analysis dashboard for global equities and forex.
+A standalone, read-only market-monitoring and analysis dashboard for global stocks and forex.
 
-## Project decision
+## Non-negotiable project scope
 
-IMI uses one shared managed PostgreSQL database for both Windows/local development and the hosted web dashboard. Both user interfaces communicate with the backend API; browser code never connects directly to PostgreSQL.
+- **Monitoring and analysis only.** No trade execution, order placement, broker account connection, exchange trading credentials, or automated trading.
+- Global equities and forex markets.
+- Timeframes: 1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w.
+- Goal: display market movement and institutional-style market context so a person can independently review price action. The dashboard does not issue guaranteed entry/exit instructions.
+- Windows local development and DigitalOcean web hosting, backed by one shared PostgreSQL database.
 
-## Repository map
+## Required monitoring modules
 
-- `.env.example` — safe configuration template (no real secrets)
-- `database/schema.sql` — initial PostgreSQL schema
-- `docs/architecture.md` — shared database, data flow, security, and deployment approach
-- `.gitignore` — excludes local secrets, databases, caches, and downloaded data
+| Module | Data required | Current implementation |
+|---|---|---|
+| Candlestick charts | Real OHLCV/quotes | Historical Twelve Data adapter only |
+| VWAP | Intraday price and volume | Basic candle-volume VWAP reference; must disclose volume limitations |
+| Order flow / footprint | Executed trades with aggressor-side or bid/ask classification | Not connected |
+| Liquidity heatmap | Time-stamped Level 2 order-book depth | Not connected |
+| Options flow | Options trades, quotes, contract metadata and volume | Not connected |
+| Multi-timeframe context | Historical and streaming market data | Timeframe selector; historical data only |
+| Monitoring alerts | Defined price/volume/indicator conditions | Not implemented |
 
-## Initial scope
+Do not synthesize order flow, depth, or options activity from candles. If a provider/feed is missing, show **Not connected** rather than invented values.
 
-- Global equities and forex
-- Timeframes: 1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w
-- Historical OHLCV data and transparent provider/status metadata
-- VWAP, EMA, RSI, ATR, and volume analysis
-- Clearly labelled replay/sample research views for order-flow, liquidity heatmaps, and options-flow until suitable licensed data feeds are selected
+## Architecture
 
-## Data and security
+- React/Vite frontend for Windows browser and hosted web access.
+- FastAPI backend owns provider connections and data validation.
+- Shared PostgreSQL database is the source of truth for stored market data.
+- Provider adapters are separate by data type: OHLCV/quotes, trade prints, Level 2 depth, and options.
+- Stream ingestion should use WebSockets where the selected provider supports them, with reconnect/backoff, timestamps, sequence/gap checks, health metrics and rate-limit handling.
+- Store timestamps in UTC. Record provider, instrument, exchange, feed entitlement, event time and ingestion time.
+- Keep all provider credentials and database credentials server-side. Never expose secrets to browser code or commit them to GitHub.
 
-- PostgreSQL is the shared source of truth.
-- Store timestamps in UTC and upsert candles by instrument/provider/timeframe/time.
-- Keep actual API keys, database passwords, and tokens out of GitHub. Copy `.env.example` to a private local `.env`; use the hosting platform's secret manager in production.
-- Never expose database credentials or provider API keys in frontend code.
-- Do not commit raw tick streams or large downloaded datasets.
+## Current software status
 
-## Operating boundary
+The current code is an **initial historical-data prototype**, not a finished institutional terminal:
+- Instrument starter list and historical OHLC candle chart exist.
+- Twelve Data historical candle ingestion is implemented but requires a valid key, eligible symbol/interval entitlement and end-to-end credential test.
+- PostgreSQL connection is configurable but needs a provisioned database and live connection test.
+- Basic candle-volume VWAP reference exists; it is not exchange VWAP when source volume is tick volume or unavailable.
+- Live streaming, global symbol discovery, genuine order-flow/footprint, Level 2 heatmap, options flow, and alerts remain to be built and tested.
+- Deployment to DigitalOcean remains to be completed.
 
-IMI is a monitoring and paper-research application only. It does not place broker/exchange orders and must not contain execution credentials or order-placement endpoints.
+## External setup still required
 
-## Next implementation stages
+1. Twelve Data API key for the existing historical OHLCV adapter.
+2. Managed PostgreSQL connection string.
+3. Additional provider accounts/entitlements for trade prints, Level 2 depth and options data. Select providers based on target exchanges, coverage, latency, licensing and budget before implementing adapters.
+4. DigitalOcean hosting configuration and private environment secrets.
 
-1. Backend service and versioned database migrations.
-2. Provider adapter for historical OHLCV and separately identified streaming quotes.
-3. API endpoints and ingestion health monitoring.
-4. Frontend instrument/watchlist/chart integration.
-5. Deployment and database backup/restore verification.
-
-See [docs/architecture.md](docs/architecture.md) for the architecture and Windows setup direction.
+See [Windows setup](docs/WINDOWS_SETUP.md) and [architecture](docs/architecture.md).
 
 ## Run on Windows
 
-See [Windows setup](docs/WINDOWS_SETUP.md). In short:
+1. Clone the repository and copy `.env.example` to a private root `.env`.
+2. Configure PostgreSQL and Twelve Data credentials.
+3. Start FastAPI from the repository root using Python 3.12.
+4. Start the Vite frontend using Node.js 22.
+5. Open `http://localhost:5173` and fetch historical candles.
 
-1. Clone this repository and copy `.env.example` to `.env`.
-2. Set a valid managed PostgreSQL connection string and Twelve Data API key in the private `.env`.
-3. Start the FastAPI backend from `backend/` using a Python 3.12 virtual environment.
-4. Start the Vite frontend from `frontend/` with `npm install` and `npm run dev`.
-5. Open `http://localhost:5173`; use **Fetch historical candles** to populate the shared database.
-
-The GitHub Actions workflow runs backend SQLite smoke tests and a frontend production build. Passing CI validates the code build, not your external database credentials or provider entitlements.
-
-## Current runnable milestone
-
-The current milestone provides instrument selection for a starter watchlist, historical OHLC chart display, historical candle ingestion, shared PostgreSQL persistence, health checks, and a candle-volume VWAP reference. It is not a complete institutional data terminal: live streaming, global instrument discovery, real order-flow/footprint, Level 2 liquidity heatmaps, and options-flow feeds are not implemented. Do not treat sample or missing panels as real exchange data.
+Passing CI validates code compilation/build and smoke tests only. It does not prove external provider credentials, data entitlements, streaming latency, or deployment readiness.
