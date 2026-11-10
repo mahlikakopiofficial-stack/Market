@@ -134,7 +134,8 @@ def provider_symbol(symbol: str) -> str:
 
 
 def serialize_bar(b: Bar) -> dict[str, Any]:
-    return {"time": int(b.candle_time.timestamp()), "datetime": b.candle_time.isoformat(),
+    dt = b.candle_time if b.candle_time.tzinfo else b.candle_time.replace(tzinfo=timezone.utc)
+    return {"time": int(dt.timestamp()), "datetime": dt.isoformat(),
             "open": float(b.open), "high": float(b.high), "low": float(b.low),
             "close": float(b.close), "volume": float(b.volume or 0),
             "source": "Twelve Data", "status": b.data_status}
@@ -182,7 +183,7 @@ async def ingest_historical(symbol: str = "EUR/USD", timeframe: str = "15m", out
         prov = db.scalar(select(Provider).where(Provider.code == "twelvedata"))
         if not inst or not prov:
             raise HTTPException(404, detail="Unknown instrument. Use /api/instruments.")
-    params = {"symbol":provider_symbol(symbol),"interval":TIMEFRAMES[timeframe],"outputsize":outputsize,"apikey":settings.twelve_data_api_key,"format":"JSON"}
+    params = {"symbol":provider_symbol(symbol),"interval":TIMEFRAMES[timeframe],"outputsize":outputsize,"apikey":settings.twelve_data_api_key,"format":"JSON","timezone":"UTC"}
     if inst.exchange_code:
         params["exchange"] = inst.exchange_code
     try:
