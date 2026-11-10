@@ -20,11 +20,11 @@ def rsi(values: list[float], period: int = 14) -> list[float | None]:
     gains = [max(x, 0.0) for x in changes]
     losses = [max(-x, 0.0) for x in changes]
     ag, al = sum(gains[:period]) / period, sum(losses[:period]) / period
-    out[period] = 100.0 if al == 0 else 100 - 100 / (1 + ag / al)
+    out[period] = 50.0 if ag == 0 and al == 0 else (100.0 if al == 0 else 100 - 100 / (1 + ag / al))
     for i in range(period + 1, len(values)):
         ag = (ag * (period - 1) + gains[i - 1]) / period
         al = (al * (period - 1) + losses[i - 1]) / period
-        out[i] = 100.0 if al == 0 else 100 - 100 / (1 + ag / al)
+        out[i] = 50.0 if ag == 0 and al == 0 else (100.0 if al == 0 else 100 - 100 / (1 + ag / al))
     return out
 
 def atr(bars: list[dict[str, Any]], period: int = 14) -> list[float | None]:
