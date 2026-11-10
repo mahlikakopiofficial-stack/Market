@@ -37,7 +37,7 @@ class Base(DeclarativeBase):
 
 class Provider(Base):
     __tablename__ = "data_providers"
-    id: Mapped[int] = mapped_column(BigInteger().with_variant(__import__("sqlalchemy").Integer, "sqlite"), primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer(), "sqlite"), primary_key=True)
     code: Mapped[str] = mapped_column(String(40), unique=True)
     display_name: Mapped[str] = mapped_column(String(100))
     data_kind: Mapped[str] = mapped_column(String(40))
