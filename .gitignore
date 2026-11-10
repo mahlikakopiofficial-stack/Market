@@ -1,0 +1,33 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Local databases, caches and downloaded market data
+*.db
+*.sqlite
+*.sqlite3
+data/local/
+data/cache/
+data/raw/
+*.parquet
+*.csv
+
+# Logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db
