@@ -42,3 +42,19 @@ IMI is a monitoring and paper-research application only. It does not place broke
 5. Deployment and database backup/restore verification.
 
 See [docs/architecture.md](docs/architecture.md) for the architecture and Windows setup direction.
+
+## Run on Windows
+
+See [Windows setup](docs/WINDOWS_SETUP.md). In short:
+
+1. Clone this repository and copy `.env.example` to `.env`.
+2. Set a valid managed PostgreSQL connection string and Twelve Data API key in the private `.env`.
+3. Start the FastAPI backend from `backend/` using a Python 3.12 virtual environment.
+4. Start the Vite frontend from `frontend/` with `npm install` and `npm run dev`.
+5. Open `http://localhost:5173`; use **Fetch historical candles** to populate the shared database.
+
+The GitHub Actions workflow runs backend SQLite smoke tests and a frontend production build. Passing CI validates the code build, not your external database credentials or provider entitlements.
+
+## Current runnable milestone
+
+The current milestone provides instrument selection, historical OHLC chart display, historical candle ingestion, shared PostgreSQL persistence, health checks, and a candle-volume VWAP reference. It is not a complete institutional data terminal: live streaming, real order-flow/footprint, Level 2 liquidity heatmaps, and options-flow feeds are not implemented. Do not treat sample or missing panels as real exchange data.
