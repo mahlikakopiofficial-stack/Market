@@ -57,4 +57,4 @@ The GitHub Actions workflow runs backend SQLite smoke tests and a frontend produ
 
 ## Current runnable milestone
 
-The current milestone provides instrument selection, historical OHLC chart display, historical candle ingestion, shared PostgreSQL persistence, health checks, and a candle-volume VWAP reference. It is not a complete institutional data terminal: live streaming, real order-flow/footprint, Level 2 liquidity heatmaps, and options-flow feeds are not implemented. Do not treat sample or missing panels as real exchange data.
+The current milestone provides instrument selection for a starter watchlist, historical OHLC chart display, historical candle ingestion, shared PostgreSQL persistence, health checks, and a candle-volume VWAP reference. It is not a complete institutional data terminal: live streaming, global instrument discovery, real order-flow/footprint, Level 2 liquidity heatmaps, and options-flow feeds are not implemented. Do not treat sample or missing panels as real exchange data.
