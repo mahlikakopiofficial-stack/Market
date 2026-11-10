@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import (
-    BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Numeric,
+    BigInteger, Boolean, DateTime, ForeignKey, Integer, Numeric,
     String, Text, UniqueConstraint, create_engine, desc, select
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
